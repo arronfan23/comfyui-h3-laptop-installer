@@ -1,0 +1,49 @@
+﻿====================================================
+  ComfyUI + H3 模型  在线一键安装（笔记本版）
+  三猫云 SanMaoCloud 出品
+====================================================
+
+【适配机型】
+  按 RTX 3080 Laptop（16GB 显存）+ 32GB 内存调试。
+  12GB 以上显存的其他笔记本也可尝试，显存更低请用桌面版。
+
+【配置要求】
+  - Windows 10 / 11 64 位
+  - NVIDIA 显卡，显存 16GB（建议）
+  - 内存 32GB（低显存模式需要内存参与调度）
+  - 显卡驱动 580 或更新（PyTorch cu130 要求，安装器会自动检测提示）
+    笔记本驱动请到 NVIDIA 官网按型号下载:
+    https://www.nvidia.cn/Download/index.aspx?lang=cn
+  - 磁盘剩余空间：60GB 以上
+  - 全程联网，共下载约 55GB（模型 + PyTorch 等）
+    模型支持断点续传，中断后重跑会自动接着下
+
+【安装方法】
+  双击「一键安装.bat」，等待完成即可。
+  - 全程自动：下载并安装 Python 3.12、ComfyUI 主程序、
+    PyTorch (cu130)、H3 模型、Node.js，并配置 Codex MCP
+  - 默认装到「本文件夹旁边的 ComfyUI 目录」
+  - 完成后自动启动 ComfyUI（低显存模式）并打开
+    http://127.0.0.1:8188
+  - 视网速约 1~2 小时，看到"安装完成"即成功
+  - 国内网络无需手动设置：HuggingFace 连不上会自动切换镜像
+
+【日常使用】
+  1. 双击 ComfyUI 文件夹里的「启动ComfyUI.bat」
+  2. 打开 Codex，直接用自然语言让它画图 / 生成视频
+     （安装时已自动配置好 comfyui MCP，重启 Codex 后生效）
+
+【常见问题】
+  - 提示驱动过旧：先到 NVIDIA 官网更新笔记本驱动再重跑
+  - 杀毒软件拦截 PowerShell：选择允许；全部脚本开源可查看
+  - 中途中断：重新双击「一键安装.bat」，已完成步骤自动跳过，
+    模型下载自动断点续传
+  - 国内用户强制走镜像下载模型：
+      powershell -ExecutionPolicy Bypass -File installer\install.ps1 -UseMirror
+  - 自定义安装目录：
+      powershell -ExecutionPolicy Bypass -File installer\install.ps1 -InstallDir "E:\AI\ComfyUI"
+
+【模型来源】
+  全部模型安装时从 HuggingFace 官方仓库下载（未转存）：
+  - Comfy-Org/MiniMax-H3   （H3 主模型 int8 / VAE）
+  - Comfy-Org/Qwen3-VL     （4B fp8 文本编码器）
