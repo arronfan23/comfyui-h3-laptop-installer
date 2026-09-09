@@ -261,7 +261,8 @@ call venv\Scripts\activate.bat
 python main.py --lowvram
 pause
 "@
-[System.IO.File]::WriteAllText((Join-Path $InstallDir "启动ComfyUI.bat"), $bat, [System.Text.Encoding]::UTF8)
+# 写为 CRLF，避免 cmd 解析 LF-only 批处理出错
+[System.IO.File]::WriteAllText((Join-Path $InstallDir "启动ComfyUI.bat"), ($bat -replace "`n", "`r`n"), [System.Text.Encoding]::UTF8)
 
 # ---------- 9. 写入 Codex MCP 配置 ----------
 if (-not $CodexConfigPath) { $CodexConfigPath = Join-Path $env:USERPROFILE ".codex\config.toml" }
