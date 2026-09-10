@@ -15,7 +15,7 @@
     笔记本驱动请到 NVIDIA 官网按型号下载:
     https://www.nvidia.cn/Download/index.aspx?lang=cn
   - 磁盘剩余空间：60GB 以上
-  - 全程联网，共下载约 55GB（模型 + PyTorch 等）
+  - 全程联网，共下载约 58GB（模型 + PyTorch 等）
     模型支持断点续传，中断后重跑会自动接着下
 
 【安装方法】
@@ -45,5 +45,5 @@
 
 【模型来源】
   全部模型安装时从 HuggingFace 官方仓库下载（未转存）：
-  - Comfy-Org/MiniMax-H3   （H3 主模型 int8 / VAE）
-  - Comfy-Org/Qwen3-VL     （4B fp8 文本编码器）
+  - Abiray/Minimax-H3-nvfp4-INT4-INT8-Convrot（H3 主模型 INT4/INT8 混合量化）
+  - Comfy-Org/MiniMax-H3（32B nvfp4 文本编码器 / VAE）

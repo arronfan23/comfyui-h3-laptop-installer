@@ -10,9 +10,10 @@
 
 | 调整 | 说明 |
 | --- | --- |
-| 文本编码器 | 用 Qwen3-VL **4B**（5GB）替换 32B（15GB），显存和下载量都省一大截 |
+| 主模型 | 换为 **INT4/INT8 混合量化**（14~15GB/个），官方推荐的 16GB 显存档位 |
+| 文本编码器 | 保留 **32B**（nvfp4 版，15.6GB；该编码器不挑显卡架构，3080 可用）。注意 H3 模型必须搭配 32B 编码器（5120 维），4B 版（2560 维）会直接报错 |
 | 启动参数 | 默认 `--lowvram` 低显存模式，权重自动在显存/内存间调度 |
-| 下载总量 | 约 **55GB**（桌面版 70GB） |
+| 下载总量 | 约 **58GB**（桌面版 70GB） |
 
 ## 快速开始
 
@@ -72,10 +73,10 @@ powershell -ExecutionPolicy Bypass -File installer\install.ps1 -SkipModels
 
 | 文件 | 大小 | 来源 |
 | --- | --- | --- |
-| `diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors` | 19.5 GB | [Comfy-Org/MiniMax-H3](https://huggingface.co/Comfy-Org/MiniMax-H3) |
-| `diffusion_models/minimax_h3_fl2va_pruned_int8_convrot.safetensors` | 19.5 GB | 同上 |
-| `text_encoders/qwen3vl_4b_fp8_scaled.safetensors` | 4.9 GB | [Comfy-Org/Qwen3-VL](https://huggingface.co/Comfy-Org/Qwen3-VL) |
-| `vae/minimax_h3_video_vae_fp16.safetensors` | 4.9 GB | Comfy-Org/MiniMax-H3 |
+| `diffusion_models/MiniMax_H3_Ref2VA_pruned_mixed_int4_int8_convrot.safetensors` | 14.1 GB | [Abiray/Minimax-H3-nvfp4-INT4-INT8-Convrot](https://huggingface.co/Abiray/Minimax-H3-nvfp4-INT4-INT8-Convrot) |
+| `diffusion_models/MiniMax_H3_FL2VA_pruned_mixed_int4_int8_convrot.safetensors` | 14.8 GB | 同上 |
+| `text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors` | 14.6 GB | [Comfy-Org/MiniMax-H3](https://huggingface.co/Comfy-Org/MiniMax-H3) |
+| `vae/minimax_h3_video_vae_fp16.safetensors` | 4.9 GB | 同上 |
 | `vae/minimax_h3_audio_vae_fp32.safetensors` | 0.6 GB | 同上 |
 
 模型的使用许可以 HuggingFace 上对应仓库的说明为准。

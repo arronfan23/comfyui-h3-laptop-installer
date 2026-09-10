@@ -24,13 +24,15 @@ function Fail($msg)  { Write-Host "[失败] $msg" -ForegroundColor Red; throw $m
 # ComfyUI 版本（含 MiniMax H3 支持、与锁定依赖兼容的官方 master 提交）
 $ComfyUICommit = "34744cd29eacea9bbdec17e628a81c2ce0737d16"
 
-# H3 模型清单（笔记本版）：int8 主模型 + 4B 文本编码器（不带 32B，省 15GB 显存/下载）
+# H3 模型清单（笔记本版，按 16GB 显存适配）
+# 主模型用 INT4/INT8 混合量化（官方推荐 16GB 档）；文本编码器必须 32B
+# （H3 要求 5120 维输出，4B 只有 2560 维不能用），nvfp4_awq 版不挑显卡架构
 $Models = @(
-    @{ Repo = "Comfy-Org/MiniMax-H3"; File = "diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors"; Size = 20970379616 },
-    @{ Repo = "Comfy-Org/MiniMax-H3"; File = "diffusion_models/minimax_h3_fl2va_pruned_int8_convrot.safetensors"; Size = 20970379616 },
-    @{ Repo = "Comfy-Org/Qwen3-VL";   File = "text_encoders/qwen3vl_4b_fp8_scaled.safetensors";                     Size = 5242467968  },
-    @{ Repo = "Comfy-Org/MiniMax-H3"; File = "vae/minimax_h3_video_vae_fp16.safetensors";                           Size = 5207808496  },
-    @{ Repo = "Comfy-Org/MiniMax-H3"; File = "vae/minimax_h3_audio_vae_fp32.safetensors";                           Size = 605254808   }
+    @{ Repo = "Abiray/Minimax-H3-nvfp4-INT4-INT8-Convrot"; File = "MiniMax_H3_Ref2VA_pruned_mixed_int4_int8_convrot.safetensors"; Dest = "diffusion_models\MiniMax_H3_Ref2VA_pruned_mixed_int4_int8_convrot.safetensors"; Size = 15093774276 },
+    @{ Repo = "Abiray/Minimax-H3-nvfp4-INT4-INT8-Convrot"; File = "MiniMax_H3_FL2VA_pruned_mixed_int4_int8_convrot.safetensors"; Dest = "diffusion_models\MiniMax_H3_FL2VA_pruned_mixed_int4_int8_convrot.safetensors"; Size = 15903012791 },
+    @{ Repo = "Comfy-Org/MiniMax-H3"; File = "text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"; Size = 15687142551 },
+    @{ Repo = "Comfy-Org/MiniMax-H3"; File = "vae/minimax_h3_video_vae_fp16.safetensors";                  Size = 5207808496  },
+    @{ Repo = "Comfy-Org/MiniMax-H3"; File = "vae/minimax_h3_audio_vae_fp32.safetensors";                  Size = 605254808   }
 )
 
 function Download-File($url, $dest, [long]$expectSize = -1) {
@@ -76,7 +78,7 @@ Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "   三猫云 SanMaoCloud" -ForegroundColor Cyan
 Write-Host "   ComfyUI + H3 一键安装（笔记本版）"
 Write-Host "   适配 RTX 3080 Laptop 16GB / 32GB 内存"
-Write-Host "   全程联网下载（约 55GB），请保持网络畅通"
+Write-Host "   全程联网下载（约 58GB），请保持网络畅通"
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -144,7 +146,8 @@ if ($SkipModels) {
     $totalGB = [math]::Round(($Models | ForEach-Object { $_.Size } | Measure-Object -Sum).Sum / 1GB, 1)
     Info "下载 H3 模型（共 ${totalGB}GB，支持断点续传）..."
     foreach ($m in $Models) {
-        $dest = Join-Path $InstallDir ("models\" + ($m.File -replace '/', '\'))
+        $relPath = if ($m.Dest) { $m.Dest } else { ($m.File -replace '/', '\') }
+        $dest = Join-Path $InstallDir ("models\" + $relPath)
         if ((Test-Path $dest) -and (Get-Item $dest).Length -eq $m.Size) {
             Ok "已存在: $($m.File)"
             continue
