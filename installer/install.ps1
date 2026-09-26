@@ -77,7 +77,7 @@ Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "   三猫云 SanMaoCloud" -ForegroundColor Cyan
 Write-Host "   ComfyUI + H3 一键安装（笔记本版）"
-Write-Host "   适配 RTX 3080 Laptop 16GB / 32GB 内存"
+Write-Host "   适配 8GB~16GB 显存笔记本（4060 / 3080 Laptop 等）"
 Write-Host "   全程联网下载（约 58GB），请保持网络畅通"
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
@@ -93,6 +93,19 @@ Info "安装目录: $InstallDir"
 $gpu = $null
 try { $gpu = (nvidia-smi --query-gpu=name --format=csv,noheader 2>$null | Select-Object -First 1) } catch {}
 if ($gpu) { Ok "检测到显卡: $gpu" } else { Warn "未检测到 NVIDIA 显卡！ComfyUI 将无法用 GPU 推理。" }
+
+# 显存大小决定启动参数（8GB 档需要更保守的调度）
+$vramGB = 0
+try {
+    $vramMiB = (nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>$null | Select-Object -First 1)
+    $vramGB = [math]::Round([int]$vramMiB / 1024, 1)
+} catch {}
+if ($vramGB -gt 0) { Ok "显存: ${vramGB}GB" }
+$launchArgs = "--lowvram"
+if ($vramGB -gt 0 -and $vramGB -lt 12) {
+    $launchArgs = "--lowvram --reserve-vram 2"
+    Warn "显存不足 12GB，将使用更保守的低显存参数（生成会比大显存机器慢，属正常）"
+}
 
 # 驱动版本检查（PyTorch cu130 需要 580+ 驱动）
 $drv = $null
@@ -256,12 +269,12 @@ title 三猫云 SanMaoCloud - ComfyUI
 cd /d %~dp0
 echo ========================================
 echo   三猫云 SanMaoCloud
-echo   ComfyUI 启动中（笔记本低显存模式 --lowvram）...
+echo   ComfyUI 启动中（笔记本低显存模式）...
 echo   浏览器访问: http://127.0.0.1:8188
 echo   关闭此窗口即停止服务
 echo ========================================
 call venv\Scripts\activate.bat
-python main.py --lowvram
+python main.py $launchArgs
 pause
 "@
 # 写为 CRLF，避免 cmd 解析 LF-only 批处理出错
